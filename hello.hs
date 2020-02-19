@@ -1,3 +1,7 @@
-string1 = "hellou"
-string2 = "world"
-greeting = string1 ++ " " ++ string2
+multMin a b c = (max a b) * c
+square x = x * x
+
+posOrNeg a =
+    if a >= 0
+        then "Positive"
+        else "Negative"
