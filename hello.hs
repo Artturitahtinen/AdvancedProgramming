@@ -1,15 +1,12 @@
-repeatString str a =
-    if a == 0
-    then ""
-    else str ++ (repeatString str (a-1))
+askNames :: IO (String, String)
+askNames = do
+    putStrLn "Enter player 1 name:"
+    player1 <- getLine
+    putStrLn "Enter player 2 name:"
+    player2 <- getLine
+    return (player1,player2)
 
-lista = [1, 5, 10]
-
-y = 10 : lista
-
-yhdistetty = lista ++ y
-
-double nums =
-    if null nums
-        then []
-        else (2 * (head nums)) : (double (tail nums))
+main :: IO ()
+main = do
+    (player1,player2) <- askNames
+    putStrLn ("Hello " ++ player1 ++ " and " ++ player2)
