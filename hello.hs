@@ -1,3 +1,4 @@
+
 askNames :: IO (String, String)
 askNames = do
     putStrLn "Enter player 1 name:"
