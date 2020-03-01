@@ -3,35 +3,36 @@ import Data.List (permutations)
 
 newtype ShipLength = ShipLength Int
 newtype Amount = Amount Int
+newtype ShipName = ShipName String
 
 type Point = (Int, Int)
 type ShipPoints = [Point]
 type Board = [[Char]]
 
-data Ship = Amount ShipLength name
+data Ship = Ship Amount ShipLength ShipName
 
 carrier :: Ship
-carrier = Ship 1 5 carrier
+carrier = Ship (Amount 1) (ShipLength 5) (ShipName "carrier")
 
 battleship :: Ship
-battleship = Ship 1 4 "battleship"
+battleship = Ship (Amount 1) (ShipLength 4) (ShipName "battleship")
 
 cruiser :: Ship
-cruiser = Ship 2 3 "cruiser"
+cruiser = Ship (Amount 2) (ShipLength 3) (ShipName "cruiser")
 
 destroyer :: Ship
-destroyer = Ship 1 2 "destroyer"
+destroyer = Ship (Amount 1) (ShipLength 2) (ShipName "destroyer")
 
 submarine :: Ship
-submarine = Ship 1 1 "submarine"
+submarine = Ship (Amount 1) (ShipLength 1) (ShipName "submarine")
 
-getShipAmount :: Ship -> Int
-getShipLength (Ship ship_amount _ _) = ship_amount
+getShipAmount :: Ship -> Amount
+getShipAmount (Ship ship_amount _ _) = ship_amount
 
-getShipLength :: Ship -> Int
+getShipLength :: Ship -> ShipLength
 getShipLength (Ship _ ship_length _) = ship_length
 
-getShipName :: Ship -> String
+getShipName :: Ship -> ShipName
 getShipName (Ship _ _ ship_name) = ship_name
 
 fieldSize = 10
@@ -52,30 +53,21 @@ splitCoordinatePairsToString (x:xs)
     | otherwise (x: head (splitCoordinatePairsToString xs)) : tail (splitCoordinatePairsToString xs)
 
                                                                                 
-setCarrierShip :: Int -> Int -> IO ShipPoints
+setCarrierShip :: Int -> Int -> IO ShipPoint
 setCarrierShip amount len = do
-                               putStrLn ("   Enter coordinates for your " ++ getShipName carrier ++ " (" ++ len ++ " set of coordinates):")
-                               carrierStr <- getLine
-                               let stringCoordinates = splitCoordinatePairsToString carrierStr
-                               let coordinates = map convertToCoordinates stringCoordinates
-                               return coordinates
-
-
-
+    putStrLn ("   Enter coordinates for your " ++ getShipName carrier ++ " (" ++ len ++ " set of coordinates):")
+    carrierStr <- getLine
+    let stringCoordinates = splitCoordinatePairsToString carrierStr
+    let coordinates = map convertToCoordinates stringCoordinates
+    return coordinates
 
 setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = if placedShips <= totalShipsAmount then 
     do
     ship <- setCarrierShip (getShipAmount carrier) (getShipLength carrier)
 
-
-
-
-
-
-
-askNames :: IO (String, String)
-askNames = do
+ askNames :: IO (String, String)
+ askNames = do
     putStrLn "Enter player 1 name:"
     player1 <- getLine
     putStrLn "Enter player 2 name:"
@@ -86,4 +78,3 @@ main :: IO ()
 main = do
     (player1,player2) <- askNames
     putStrLn (player1 ++ "'s turn to place ships")
-    player1Ships <- setShips []
