@@ -48,9 +48,10 @@ convertToCoordinates _ = (-1, -1)
 
 splitCoordinatePairsToString :: String -> [String]
 splitCoordinatePairsToString [] = [[]]
-splitCoordinatePairsToString (x:xs) 
-    | x == ";" = [] : splitCoordinatePairsToString
-    | otherwise (x: head (splitCoordinatePairsToString xs)) : tail (splitCoordinatePairsToString xs)
+splitCoordinatePairsToString (x:xs) = if x ==";" then
+     [] : splitCoordinatePairsToString
+    else 
+        (x: head (splitCoordinatePairsToString xs)) : tail (splitCoordinatePairsToString xs)
 
                                                                                 
 setCarrierShip :: Int -> Int -> IO ShipPoint
@@ -64,10 +65,12 @@ setCarrierShip amount len = do
 setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = if placedShips <= totalShipsAmount then 
     do
-    ship <- setCarrierShip (getShipAmount carrier) (getShipLength carrier)
+    carrierShip <- setCarrierShip (getShipAmount carrier) (getShipLength carrier)
+    listOfShips <- setShips (placedShips + 1)
+    return (ship : listOfShips)
 
- askNames :: IO (String, String)
- askNames = do
+askNames :: IO (String, String)
+askNames = do
     putStrLn "Enter player 1 name:"
     player1 <- getLine
     putStrLn "Enter player 2 name:"
