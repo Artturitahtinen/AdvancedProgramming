@@ -54,9 +54,9 @@ splitCoordinatePairsToString (x:xs) = if x ==";" then
         (x: head (splitCoordinatePairsToString xs)) : tail (splitCoordinatePairsToString xs)
 
                                                                                 
-setCarrierShip :: Int -> Int -> IO ShipPoint
-setCarrierShip amount len = do
-    putStrLn ("   Enter coordinates for your " ++ getShipName carrier ++ " (" ++ len ++ " set of coordinates):")
+setShip :: Int -> Int -> String -> IO ShipPoint
+setShip amount len = do
+    putStrLn ("   Enter coordinates for your " ++ shipname ++ " (" ++ len ++ " set of coordinates):")
     carrierStr <- getLine
     let stringCoordinates = splitCoordinatePairsToString carrierStr
     let coordinates = map convertToCoordinates stringCoordinates
@@ -65,7 +65,12 @@ setCarrierShip amount len = do
 setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = if placedShips <= totalShipsAmount then 
     do
-    carrierShip <- setCarrierShip (getShipAmount carrier) (getShipLength carrier)
+    carrier_Ship <- setShip (getShipAmount carrier) (getShipLength carrier) (getShipName carrier)
+    battle_Ship <- setShip (getShipAmount battleship) (getShipLength battleship) (getShipName battleship)
+    cruiser_Ship <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser)
+    destroyer_Ship <- setShip (getShipAmount destroyer) (getShipLength destroyer) (getShipName destroyer)
+    submarine_Ship <- setShip (getShipAmount submarine) (getShipLength submarine) (getShipName submarine) 
+
     listOfShips <- setShips (placedShips + 1)
     return (ship : listOfShips)
 
