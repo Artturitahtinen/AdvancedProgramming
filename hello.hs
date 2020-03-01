@@ -1,3 +1,6 @@
+import Data.Char (ord)
+import Data.List (permutations)
+
 newtype ShipLength = ShipLength Int
 newtype Amount = Amount Int
 
@@ -37,23 +40,33 @@ totalShipsAmount = 6
 initializeBoard :: Board
 initializeBoard = take fieldSize (repeat (replicate fieldSize '#'))
 
+
+convertToCoordinates :: String -> Point
+convertToCoordinates ['(', x, ',', y, ')'] = ((ord x) - (ord '0') + 1, (ord y) - (ord '0') + 1)
+convertToCoordinates _ = (-1, -1)
+
 splitCoordinatePairsToString :: String -> [String]
-splitCoordinatePairsToString = 
+splitCoordinatePairsToString [] = [[]]
+splitCoordinatePairsToString (x:xs) 
+    | x == ";" = [] : splitCoordinatePairsToString
+    | otherwise (x: head (splitCoordinatePairsToString xs)) : tail (splitCoordinatePairsToString xs)
+
+                                                                                
+setCarrierShip :: Int -> Int -> IO ShipPoints
+setCarrierShip amount len = do
+                               putStrLn ("   Enter coordinates for your " ++ getShipName carrier ++ " (" ++ len ++ " set of coordinates):")
+                               carrierStr <- getLine
+                               let stringCoordinates = splitCoordinatePairsToString carrierStr
+                               let coordinates = map convertToCoordinates stringCoordinates
+                               return coordinates
 
 
-setShip :: [ShipPoints] -> IO ShipPoints
-setShip = do
-    putStrLn("   Enter coordinates for your " ++ getShipName carrier ++ " (5 set of coordinates):")
-    carrierStr <- getLine
-    let stringCoordinates = splitCoordinatePairsToString
 
 
-
-
-setShips :: Int -> IO [ShipPoints]
+setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = if placedShips <= totalShipsAmount then 
     do
-    ship <- setShip placedShips 
+    ship <- setCarrierShip (getShipAmount carrier) (getShipLength carrier)
 
 
 
@@ -73,4 +86,4 @@ main :: IO ()
 main = do
     (player1,player2) <- askNames
     putStrLn (player1 ++ "'s turn to place ships")
-    player1Ships <- setCarrierShips 0  
+    player1Ships <- setShips []
