@@ -64,14 +64,11 @@ enoughCoordinates len shipCoordinates
  | shipLengthToInt len == length shipCoordinates = True
  | otherwise = False
 
-coordinatesWithinBoard :: Point -> Bool    --Miten saisin tässä käytyä läpi ShipPoints-listan tuplet chekattua tässä läpi?
-coordinatesWithinBoard shipCoords 
-    | (and [
-        fst shipCoords >= 1
-      , snd shipCoords >= 1
-      , fst shipCoords <= fieldSize
-      , snd shipCoords <= fieldSize]) = True
-    | otherwise = False  
+coordinatesWithinBoard :: ShipPoints -> Bool    --Miten saisin tässä käytyä läpi ShipPoints-listan tuplet chekattua tässä läpi?
+coordinatesWithinBoard [] = []
+coordinatesWithinBoard ((x, y) : rest)
+    | (x >= 1 && x <=10 && y >= 1 && y <= 10) = True
+    | otherwise = coordinatesWithinBoard rest  
 -- noOverlappingCoords :: ShipPoints -> [ShipPoints] -> Bool
 -- noOverlappingCoords shipCoordinates placedShips
 --  | shipCoordinates /= placedShips = True
@@ -83,7 +80,7 @@ coordinatesWithinBoard shipCoords
 
 validateGivenCoordinates2 :: ShipLength -> ShipName -> ShipPoints -> [ShipPoints] -> Bool
 validateGivenCoordinates2 len shipname shipCoordinates placedShips = if enoughCoordinates len shipCoordinates == True 
-    && coordinatesWithinBoard shipCoordinates      
+    && coordinatesWithinBoard shipCoordinates == True  
     then True
     else False
 
