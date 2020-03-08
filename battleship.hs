@@ -64,11 +64,15 @@ enoughCoordinates len shipCoordinates
  | shipLengthToInt len == length shipCoordinates = True
  | otherwise = False
 
-coordinatesWithinBoard :: ShipPoints -> Bool    --Miten saisin tässä käytyä läpi ShipPoints-listan tuplet chekattua tässä läpi?
-coordinatesWithinBoard [] = []
-coordinatesWithinBoard ((x, y) : rest)
-    | (x >= 1 && x <=10 && y >= 1 && y <= 10) = True
-    | otherwise = coordinatesWithinBoard rest  
+coordinatesWithinBoard :: Point -> Bool    --Miten saisin tässä käytyä läpi ShipPoints-listan tuplet chekattua tässä läpi?
+coordinatesWithinBoard shipCoordinate = 
+    and [
+        fst shipCoordinate >= 1,
+        snd shipCoordinate >= 1,
+        fst shipCoordinate <= fieldSize,
+        snd shipCoordinate <= fieldSize
+    ]
+
 -- noOverlappingCoords :: ShipPoints -> [ShipPoints] -> Bool
 -- noOverlappingCoords shipCoordinates placedShips
 --  | shipCoordinates /= placedShips = True
@@ -80,20 +84,9 @@ coordinatesWithinBoard ((x, y) : rest)
 
 validateGivenCoordinates2 :: ShipLength -> ShipName -> ShipPoints -> [ShipPoints] -> Bool
 validateGivenCoordinates2 len shipname shipCoordinates placedShips = if enoughCoordinates len shipCoordinates == True 
-    && coordinatesWithinBoard shipCoordinates == True  
+    && coordinatesWithinBoard [shipCoordinate | shipCoordinate <- shipCoordinates] == True  
     then True
     else False
-
-validateGivenCoordinates :: ShipLength -> ShipName -> ShipPoints -> [ShipPoints] -> Bool
-validateGivenCoordinates len shipname shipCoordinates placedShips
-    | length shipCoordinates /= shipLengthToInt len = False -- Check if ship was given enough coordinates
-    | or [coord1 == coord2 | ship2 <- placedShips, coord1 <- shipCoordinates, coord2 <- ship2] = False -- The coordinates may not overlap with another ship
-    | not (and [coordinatesWithinBoard coord | coord <- shipCoordinates]) = False -- Check if coordinates lie in the field
-    | and (map (==0) [abs ((fst coord1) - (fst coord2)) | coord1 <- shipCoordinates, coord2 <- shipCoordinates]) -- Check if  coordinates are neighbors (vertical)
-        = (sum [abs ((snd coord1) - (snd coord2)) | coord1 <- shipCoordinates, coord2 <- shipCoordinates]) * 3 == (shipLengthToInt len-1) * (shipLengthToInt len^2 + shipLengthToInt len)
-    | and (map (==0) [abs ((snd coord1) - (snd coord2)) | coord1 <- shipCoordinates, coord2 <- shipCoordinates]) -- Check if  coordinates are neighbors (horizontal)
-        = (sum [abs ((fst coord1) - (fst coord2)) | coord1 <- shipCoordinates, coord2 <- shipCoordinates]) * 3 == (shipLengthToInt len-1) * (shipLengthToInt len^2 + shipLengthToInt len)
-    | otherwise = False -- Coordinates are not on the same line
 
                                                                     
 setShip :: Amount -> ShipLength -> ShipName -> [ShipPoints] -> IO ShipPoints
@@ -102,7 +95,7 @@ setShip amount len shipname placedShips = do
     shipAllCoordinatesString <- getLine
     let stringCoordinates = splitCoordinatePairsToString shipAllCoordinatesString
     let shipCoordinates = map convertToCoordinates stringCoordinates
-    if validateGivenCoordinates len shipname shipCoordinates placedShips
+    if validateGivenCoordinates2 len shipname shipCoordinates placedShips
         then return shipCoordinates
         else
             setShip amount len shipname placedShips
