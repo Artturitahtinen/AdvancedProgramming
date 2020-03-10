@@ -53,6 +53,17 @@ totalShipsAmount = 6
 initializeBoard :: Board
 initializeBoard = take fieldSize (repeat (replicate fieldSize '#'))
 
+getNthElemOfList :: [a] -> a
+getNthElemOfList a (x : xs)
+ | (a == 1) = x
+ | otherwise = getNthElemOfList (a-1) xs
+
+replaceNthElemOfList :: Int -> a -> [a] -> [a]
+replaceNthElemOfList _ _ [] = []
+replaceNthElemOfList n newVal (x : xs)
+ | n == 0 = newVal:xs
+ | otherwise = x:replaceNthElemOfList (n-1) newVal xs
+
 
 convertToCoordinates :: String -> Point
 convertToCoordinates ['(', x, ',', y, ')'] = ((ord x) - (ord '0') + 1, (ord y) - (ord '0') + 1)
@@ -133,27 +144,29 @@ setShips placedShips = do
 
     return (f)
 
+checkIfHit :: ShipPoints -> [ShipPoints] -> String
+checkIfHit fireToCoordinate enemyShips
+ | or ([fireToCoordinate == enemyShipPoint | enemyShipPoint <- enemyShips]) == False = "No hit"
+ | and ([getNthElemOfList ])
+
+
 fireToCoordinate :: String -> Point -> Board -> [ShipPoints] -> IO([ShipPoints])
-fireToCoordinate playerName fireToCoordinate playerBoard playerShips = do
+fireToCoordinate playerName fireToCoordinate enemyBoard enemyShips = do
     putStrLn (playerName ++ "'s " ++ "turn to shoot (insert one coordinate pair)")
     fireCoordinate <- getLine
     if validateGivenCoordinates fireCoordinate then
-        
+        do
+            let missOrHit = checkIfHit [fireToCoordinate] enemyShips
+
 
 
 playGame :: String -> String -> Board -> Board -> [ShipPoints] -> [ShipPoints] -> IO ()
 playGame player1 player2 player1Board player2Board player1Ships player2Ships = do
     player2CurrentShipList <- fireToCoordinate player1 player2Board player2Ships               --Player 1 firing turn
     player1CurrentShipList <- fireToCoordinate player2 player1Board player1Ships               --Player 2 firing turn
-    if | length player2CurrentShipList == 0 -> putStrLn(player1 ++ " has won!")
-       | length player1CurrentShipList == 0 -> putStrLn(player2 ++ " has won!")
-       | otherwise -> playGame player1 player2 player1Board player2Board player1CurrentShipList player2CurrentShipList
-
-
-    fireCoordinate <- getLine
-    convertToCoordinates fireCoordinate
-    if coordinatesWithinBoard fireCoordinate then
-        (newBoard, newShipList) <- fireToCoordinate fireCoordinate player2Board player2Ships
+        if | length player2CurrentShipList == 0 -> putStrLn(player1 ++ " has won!")
+           | length player1CurrentShipList == 0 -> putStrLn(player2 ++ " has won!")
+           | otherwise -> playGame player1 player2 player1Board player2Board player1CurrentShipList player2CurrentShipList
 
 
 askNames :: IO (String, String)
