@@ -1,5 +1,11 @@
+{-# LANGUAGE MultiWayIf #-}
+
 import Data.Char (ord)
 import Data.List (permutations)
+import Data.Ord (comparing)
+import Data.List (maximumBy)
+import Data.List (minimumBy)
+import Data.List (intersect)
 
 newtype ShipLength = ShipLength Int
 newtype Amount = Amount Int
@@ -54,17 +60,17 @@ convertToCoordinates _ = (-1, -1)
 
 splitCoordinatePairsToString :: String -> [String]
 splitCoordinatePairsToString [] = [[]]
-splitCoordinatePairsToString (x:xs) = if x == ':' then
+splitCoordinatePairsToString (x:xs) = if x == ';' then
      [] : splitCoordinatePairsToString xs
     else 
         (x: head (splitCoordinatePairsToString xs)) : tail (splitCoordinatePairsToString xs)
 
 enoughCoordinates :: ShipLength -> ShipPoints -> Bool
 enoughCoordinates len shipCoordinates
- | shipLengthToInt len == length shipCoordinates = True
- | otherwise = False
+ | shipLengthToInt len /= length shipCoordinates = False
+ | otherwise = True
 
-coordinatesWithinBoard :: Point -> Bool    --Miten saisin tässä käytyä läpi ShipPoints-listan tuplet chekattua tässä läpi?
+coordinatesWithinBoard :: Point -> Bool    
 coordinatesWithinBoard shipCoordinate = 
     and [
         fst shipCoordinate >= 1,
@@ -73,20 +79,29 @@ coordinatesWithinBoard shipCoordinate =
         snd shipCoordinate <= fieldSize
     ]
 
--- noOverlappingCoords :: ShipPoints -> [ShipPoints] -> Bool
--- noOverlappingCoords shipCoordinates placedShips
---  | shipCoordinates /= placedShips = True
---  | otherwise = False  
+overlappingCoords :: (Eq a) => [a] -> [a] -> Bool      
+overlappingCoords a = not . null . intersect a
 
--- loopShipPoints :: ShipPoints -> Point
--- loopShipPoints [] = (-1, -1)
--- loopShipPoints (x, y) : xs) = x : (loopShipPoints xs)
+isHorizontalNeighbourCoords :: ShipPoints  -> ShipLength -> Bool
+isHorizontalNeighbourCoords shipCoordinates len 
+ |  fst (maximumBy (comparing fst) shipCoordinates) - fst (minimumBy (comparing fst) shipCoordinates) + 1 /= (shipLengthToInt len) || 
+    snd (maximumBy (comparing snd) shipCoordinates) - snd (minimumBy (comparing snd) shipCoordinates) /= 0 = False
+ | otherwise = True
 
-validateGivenCoordinates2 :: ShipLength -> ShipName -> ShipPoints -> [ShipPoints] -> Bool
-validateGivenCoordinates2 len shipname shipCoordinates placedShips = if enoughCoordinates len shipCoordinates == True 
-    && coordinatesWithinBoard [shipCoordinate | shipCoordinate <- shipCoordinates] == True  
-    then True
-    else False
+isVerticalNeighbourCoords :: ShipPoints -> ShipLength -> Bool
+isVerticalNeighbourCoords shipCoordinates len
+ | snd (maximumBy (comparing snd) shipCoordinates) - snd (minimumBy (comparing snd) shipCoordinates) + 1 /= (shipLengthToInt len) ||
+   fst (maximumBy (comparing fst) shipCoordinates) - fst (minimumBy (comparing fst) shipCoordinates) /= 0 = False
+ | otherwise = True
+
+validateGivenCoordinates :: ShipLength -> ShipName -> ShipPoints -> [ShipPoints] -> Bool
+validateGivenCoordinates len shipname shipCoordinates placedShips
+ | enoughCoordinates len shipCoordinates == False = False                                               --Check there is not too much or too less coordinatepairs                             
+ | not (and [coordinatesWithinBoard shipCoordinate | shipCoordinate <- shipCoordinates]) = False        --Check coordinates are inside board
+ | or ([overlappingCoords shipCoordinates shipsCoords | shipsCoords <- placedShips])  = False           --Check coordinates don't overlap
+ | and ([isHorizontalNeighbourCoords shipCoordinates len]) = True                                       --Check coordinates are horizontally neighbours
+ | and ([isVerticalNeighbourCoords shipCoordinates len]) = True                                         --Check coordinates are vertically neighbours                       
+ | otherwise = False
 
                                                                     
 setShip :: Amount -> ShipLength -> ShipName -> [ShipPoints] -> IO ShipPoints
@@ -95,7 +110,7 @@ setShip amount len shipname placedShips = do
     shipAllCoordinatesString <- getLine
     let stringCoordinates = splitCoordinatePairsToString shipAllCoordinatesString
     let shipCoordinates = map convertToCoordinates stringCoordinates
-    if validateGivenCoordinates2 len shipname shipCoordinates placedShips
+    if validateGivenCoordinates len shipname shipCoordinates placedShips
         then return shipCoordinates
         else
             setShip amount len shipname placedShips
@@ -118,9 +133,27 @@ setShips placedShips = do
 
     return (f)
 
-playGame :: String -> String -> IO ()
-playGame player1 player2 = do
-    putStrLn ("mo")
+fireToCoordinate :: String -> Point -> Board -> [ShipPoints] -> IO([ShipPoints])
+fireToCoordinate playerName fireToCoordinate playerBoard playerShips = do
+    putStrLn (playerName ++ "'s " ++ "turn to shoot (insert one coordinate pair)")
+    fireCoordinate <- getLine
+    if validateGivenCoordinates fireCoordinate then
+        
+
+
+playGame :: String -> String -> Board -> Board -> [ShipPoints] -> [ShipPoints] -> IO ()
+playGame player1 player2 player1Board player2Board player1Ships player2Ships = do
+    player2CurrentShipList <- fireToCoordinate player1 player2Board player2Ships               --Player 1 firing turn
+    player1CurrentShipList <- fireToCoordinate player2 player1Board player1Ships               --Player 2 firing turn
+    if | length player2CurrentShipList == 0 -> putStrLn(player1 ++ " has won!")
+       | length player1CurrentShipList == 0 -> putStrLn(player2 ++ " has won!")
+       | otherwise -> playGame player1 player2 player1Board player2Board player1CurrentShipList player2CurrentShipList
+
+
+    fireCoordinate <- getLine
+    convertToCoordinates fireCoordinate
+    if coordinatesWithinBoard fireCoordinate then
+        (newBoard, newShipList) <- fireToCoordinate fireCoordinate player2Board player2Ships
 
 
 askNames :: IO (String, String)
@@ -140,6 +173,6 @@ main = do
     putStrLn (player2 ++ "'s turn to place ships")
     player2Ships <- setShips []
 
-    playGame player1 player2
+    playGame player1 player2 initializeBoard initializeBoard player1Ships player2Ships
 
 
