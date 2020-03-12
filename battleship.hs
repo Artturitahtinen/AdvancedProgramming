@@ -1,11 +1,11 @@
 {-# LANGUAGE MultiWayIf #-}
 
 import Data.Char (ord)
-import Data.List (permutations)
 import Data.Ord (comparing)
 import Data.List (maximumBy)
 import Data.List (minimumBy)
 import Data.List (intersect)
+import Data.List (delete)
 
 newtype ShipLength = ShipLength Int
 newtype Amount = Amount Int
@@ -52,11 +52,6 @@ totalShipsAmount = 6
 
 initializeBoard :: Board
 initializeBoard = take fieldSize (repeat (replicate fieldSize '#'))
-
-getNthElemOfList :: [a] -> a
-getNthElemOfList a (x : xs)
- | (a == 1) = x
- | otherwise = getNthElemOfList (a-1) xs
 
 replaceNthElemOfList :: Int -> a -> [a] -> [a]
 replaceNthElemOfList _ _ [] = []
@@ -144,29 +139,51 @@ setShips placedShips = do
 
     return (f)
 
-checkIfHit :: ShipPoints -> [ShipPoints] -> String
+checkIfHit :: Point -> [ShipPoints] -> String
 checkIfHit fireToCoordinate enemyShips
- | or ([fireToCoordinate == enemyShipPoint | enemyShipPoint <- enemyShips]) == False = "No hit"
- | and ([getNthElemOfList ])
+ | or ([elem fireToCoordinate enemyShipPoint | enemyShipPoint <- enemyShips]) == False = "No hit"
+ | otherwise = "Hit"
 
+removeCoordinatePairFromList :: Point -> [ShipPoints] -> [ShipPoints]
+removeCoordinatePairFromList fireCoordinate enemyShips =  (filter (notElem fireCoordinate) enemyShips) 
+-- or ([filter (notElem fireCoordinate) enemyShipPoints | enemyShipPoints <- enemyShips]) 
 
-fireToCoordinate :: String -> Point -> Board -> [ShipPoints] -> IO([ShipPoints])
-fireToCoordinate playerName fireToCoordinate enemyBoard enemyShips = do
-    putStrLn (playerName ++ "'s " ++ "turn to shoot (insert one coordinate pair)")
-    fireCoordinate <- getLine
-    if validateGivenCoordinates fireCoordinate then
+fireToCoordinate :: String -> [ShipPoints] -> IO ([ShipPoints])
+fireToCoordinate playerName enemyShips = do
+    putStrLn (playerName ++ "'s " ++ "turn to fire (insert one coordinate pair)")
+    fireCoordinateStr <- getLine
+    let fireCoordinate = convertToCoordinates fireCoordinateStr
+    if coordinatesWithinBoard fireCoordinate then
         do
-            let missOrHit = checkIfHit [fireToCoordinate] enemyShips
+            let missOrHit = checkIfHit fireCoordinate enemyShips
+            if missOrHit == "Hit" then 
+                do
+                    let removedCoordinateInList = removeCoordinatePairFromList fireCoordinate enemyShips
+                    let newShipList = filter(not . null) removedCoordinateInList
+                    if length newShipList < length removedCoordinateInList then
+                        do
+                         putStrLn ("Hit and sank a ship!")
+                         return (newShipList)
+                    else     
+                        do
+                        putStrLn ("Hit!")    
+                        return (newShipList)
+            else 
+                do
+                putStrLn ("Miss")    
+                return (enemyShips)
+    else
+        fireToCoordinate playerName enemyShips                    
 
 
-
-playGame :: String -> String -> Board -> Board -> [ShipPoints] -> [ShipPoints] -> IO ()
-playGame player1 player2 player1Board player2Board player1Ships player2Ships = do
-    player2CurrentShipList <- fireToCoordinate player1 player2Board player2Ships               --Player 1 firing turn
-    player1CurrentShipList <- fireToCoordinate player2 player1Board player1Ships               --Player 2 firing turn
+playGame :: String -> String -> [ShipPoints] -> [ShipPoints] -> IO ()
+playGame player1 player2 player1Ships player2Ships = 
+    do
+        player2CurrentShipList <- fireToCoordinate player1 player2Ships               --Player 1 firing turn
+        player1CurrentShipList <- fireToCoordinate player2 player1Ships               --Player 2 firing turn
         if | length player2CurrentShipList == 0 -> putStrLn(player1 ++ " has won!")
            | length player1CurrentShipList == 0 -> putStrLn(player2 ++ " has won!")
-           | otherwise -> playGame player1 player2 player1Board player2Board player1CurrentShipList player2CurrentShipList
+           | otherwise -> playGame player1 player2 player1CurrentShipList player2CurrentShipList     
 
 
 askNames :: IO (String, String)
@@ -186,6 +203,6 @@ main = do
     putStrLn (player2 ++ "'s turn to place ships")
     player2Ships <- setShips []
 
-    playGame player1 player2 initializeBoard initializeBoard player1Ships player2Ships
+    playGame player1 player2 player1Ships player2Ships
 
 
