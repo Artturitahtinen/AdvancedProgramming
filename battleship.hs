@@ -7,10 +7,6 @@ import Data.List (maximumBy)
 import Data.List (minimumBy)
 import Data.List (intersect)
 
-type Point = (Int, Int)
-type ShipPoints = [Point]
-type Board = [[Char]]
-
 fieldSize = 10
 
 convertToCoordinates :: String -> Point
@@ -61,7 +57,6 @@ validateGivenCoordinates len shipname shipCoordinates placedShips
  | and ([isHorizontalNeighbourCoords shipCoordinates len]) = True                                       --Check coordinates are horizontally neighbours
  | and ([isVerticalNeighbourCoords shipCoordinates len]) = True                                         --Check coordinates are vertically neighbours                       
  | otherwise = False
-
                                                                     
 setShip :: Amount -> ShipLength -> ShipName -> [ShipPoints] -> IO ShipPoints
 setShip amount len shipname placedShips = do
@@ -73,7 +68,6 @@ setShip amount len shipname placedShips = do
         then return shipCoordinates
         else
             setShip amount len shipname placedShips
-    
 
 setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = do
@@ -99,7 +93,6 @@ checkIfHit fireToCoordinate enemyShips
 
 removePointFromShip :: Point -> ShipPoints -> ShipPoints
 removePointFromShip fireCoordinate ships = filter (/= fireCoordinate) ships
-
 
 removeCoordinatePairFromList :: Point -> [ShipPoints] -> [ShipPoints]
 removeCoordinatePairFromList fireCoordinate enemyShips =  map (removePointFromShip fireCoordinate) enemyShips
@@ -131,7 +124,6 @@ fireToCoordinate playerName enemyShips = do
     else
         fireToCoordinate playerName enemyShips                    
 
-
 playGame :: String -> String -> [ShipPoints] -> [ShipPoints] -> IO ()
 playGame player1 player2 player1Ships player2Ships = 
     do
@@ -140,7 +132,6 @@ playGame player1 player2 player1Ships player2Ships =
         if | length player2CurrentShipList == 0 -> putStrLn(player1 ++ " has won!")
            | length player1CurrentShipList == 0 -> putStrLn(player2 ++ " has won!")
            | otherwise -> playGame player1 player2 player1CurrentShipList player2CurrentShipList     
-
 
 askNames :: IO (String, String)
 askNames = do
