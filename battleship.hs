@@ -1,64 +1,17 @@
 {-# LANGUAGE MultiWayIf #-}
 
+import Shiptypes
 import Data.Char (ord)
 import Data.Ord (comparing)
 import Data.List (maximumBy)
 import Data.List (minimumBy)
 import Data.List (intersect)
-import Data.List (delete)
-
-newtype ShipLength = ShipLength Int
-newtype Amount = Amount Int
-newtype ShipName = ShipName String
 
 type Point = (Int, Int)
 type ShipPoints = [Point]
 type Board = [[Char]]
 
-data Ship = Ship Amount ShipLength ShipName
-
-carrier :: Ship
-carrier = Ship (Amount 1) (ShipLength 5) (ShipName "carrier")
-
-battleship :: Ship
-battleship = Ship (Amount 1) (ShipLength 4) (ShipName "battleship")
-
-cruiser :: Ship
-cruiser = Ship (Amount 2) (ShipLength 3) (ShipName "cruiser")
-
-destroyer :: Ship
-destroyer = Ship (Amount 1) (ShipLength 2) (ShipName "destroyer")
-
-submarine :: Ship
-submarine = Ship (Amount 1) (ShipLength 1) (ShipName "submarine")
-
-getShipAmount :: Ship -> Amount
-getShipAmount (Ship ship_amount _ _) = ship_amount
-
-getShipLength :: Ship -> ShipLength
-getShipLength (Ship _ ship_length _) = ship_length
-
-getShipName :: Ship -> ShipName
-getShipName (Ship _ _ ship_name) = ship_name
-
-shipNameToString :: ShipName -> String
-shipNameToString (ShipName i) = i
-
-shipLengthToInt :: ShipLength -> Int
-shipLengthToInt (ShipLength i) = i
-
 fieldSize = 10
-totalShipsAmount = 6
-
-initializeBoard :: Board
-initializeBoard = take fieldSize (repeat (replicate fieldSize '#'))
-
-replaceNthElemOfList :: Int -> a -> [a] -> [a]
-replaceNthElemOfList _ _ [] = []
-replaceNthElemOfList n newVal (x : xs)
- | n == 0 = newVal:xs
- | otherwise = x:replaceNthElemOfList (n-1) newVal xs
-
 
 convertToCoordinates :: String -> Point
 convertToCoordinates ['(', x, ',', y, ')'] = ((ord x) - (ord '0') + 1, (ord y) - (ord '0') + 1)
@@ -144,9 +97,12 @@ checkIfHit fireToCoordinate enemyShips
  | or ([elem fireToCoordinate enemyShipPoint | enemyShipPoint <- enemyShips]) == False = "No hit"
  | otherwise = "Hit"
 
+removePointFromShip :: Point -> ShipPoints -> ShipPoints
+removePointFromShip fireCoordinate ships = filter (/= fireCoordinate) ships
+
+
 removeCoordinatePairFromList :: Point -> [ShipPoints] -> [ShipPoints]
-removeCoordinatePairFromList fireCoordinate enemyShips =  (filter (notElem fireCoordinate) enemyShips) 
--- or ([filter (notElem fireCoordinate) enemyShipPoints | enemyShipPoints <- enemyShips]) 
+removeCoordinatePairFromList fireCoordinate enemyShips =  map (removePointFromShip fireCoordinate) enemyShips
 
 fireToCoordinate :: String -> [ShipPoints] -> IO ([ShipPoints])
 fireToCoordinate playerName enemyShips = do
