@@ -9,6 +9,7 @@ import Data.List (intersect)
 
 fieldSize = 10
 
+-- Real coordinates in game's logic are given input coordinates + 1
 convertToCoordinates :: String -> Point
 convertToCoordinates ['(', x, ',', y, ')'] = ((ord x) - (ord '0') + 1, (ord y) - (ord '0') + 1)
 convertToCoordinates _ = (-1, -1)
@@ -72,19 +73,19 @@ setShip amount len shipname placedShips = do
 setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = do
     carrier_Ship <- setShip (getShipAmount carrier) (getShipLength carrier) (getShipName carrier) []
-    let a = carrier_Ship : placedShips 
+    let firstShipPlaced = carrier_Ship : placedShips 
     battle_Ship <- setShip (getShipAmount battleship) (getShipLength battleship) (getShipName battleship) a
-    let b = battle_Ship : a
+    let secondShipPlaced = battle_Ship : firstShipPlaced
     cruiser_Ship <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser) b
-    let c = cruiser_Ship : b
+    let thirdShipPlaced = cruiser_Ship : secondShipPlaced
     cruiser_Ship2 <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser) c 
-    let d = cruiser_Ship : c
+    let fourthShipPlaced = cruiser_Ship2 : thirdShipPlaced
     destroyer_Ship <- setShip (getShipAmount destroyer) (getShipLength destroyer) (getShipName destroyer) d 
-    let e = destroyer_Ship : d
+    let fifthShipPlaced = destroyer_Ship : fourthShipPlaced
     submarine_Ship <- setShip (getShipAmount submarine) (getShipLength submarine) (getShipName submarine) e
-    let f = submarine_Ship : e
+    let allShipsPlaced = submarine_Ship : fifthShipPlaced
 
-    return (f)
+    return allShipsPlaced
 
 checkIfHit :: Point -> [ShipPoints] -> String
 checkIfHit fireToCoordinate enemyShips
@@ -119,7 +120,7 @@ fireToCoordinate playerName enemyShips = do
                         return (newShipList)
             else 
                 do
-                putStrLn ("Miss")    
+                putStrLn ("Miss")
                 return (enemyShips)
     else
         fireToCoordinate playerName enemyShips                    

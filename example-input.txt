@@ -1,0 +1,56 @@
+Ville
+Kalle
+
+Ville's ships:
+(0,0);(1,0);(2,0);(3,0);(4,0)
+(0,1);(1,1);(2,1);(3,1)
+(0,2);(1,2);(2,2)
+(0,3);(1,3);(2,3)
+(0,4);(1,4)
+(0,5)
+
+Kalle's ships:
+(9,0);(9,1);(9,2);(9,3);(9,4)
+(9,5);(9,6);(9,7);(9,8)
+(8,0);(8,1);(8,2)
+(8,3);(8,4);(8,5)
+(8,6);(8,7)
+(8,8)
+
+Ville's turn:(9,0)
+Kalle's turn:(0,0)
+Ville's turn:(9,1)
+Kalle's turn:(1,0)
+Ville's turn:(9,2)
+Kalle's turn:(2,0)
+Ville's turn:(9,3)		
+Kalle's turn:(3,0)			
+Ville's turn:(9,4)			--Kalle's carrier has sunk
+Kalle's turn:(4,0)			--Ville's carrier has sunk
+Ville's turn:(9,5)
+Kalle's turn:(5,0)
+Ville's turn:(9,6)
+Kalle's turn:(0,1)
+Ville's turn:(9,7)
+Kalle's turn:(1,1)
+Ville's turn:(9,8)			--Kalle's battleship has sunk
+Kalle's turn:(2,1)
+Ville's turn:(8,0)
+Kalle's turn:(3,1)			--Ville's battleship has sunk
+Ville's turn:(8,1)
+Kalle's turn:(0,2)
+Ville's turn:(8,2)			--Kalle's cruiser has sunk
+Kalle's turn:(1,2)
+Ville's turn:(8,3)
+Kalle's turn:(2,2)			--Ville's cruiser has sunk
+Ville's turn:(8,4)
+Kalle's turn:(0,3)
+Ville's turn:(8,5)			--Kalle's cruiser has sunk
+Kalle's turn:(1,3)
+Ville's turn:(8,6)
+Kalle's turn:(2,3)			--Ville's cruiser has sunk
+Ville's turn:(8,7)			--Kalle's destroyer has sunk
+Kalle's turn:(0,6)
+Ville's turn:(8,8)			--Kalle's submarine has sunk
+
+Ville has won!

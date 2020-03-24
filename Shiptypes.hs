@@ -16,7 +16,6 @@ module Shiptypes
 ,   ShipName
 ,   Point
 ,   ShipPoints
-,   Board
 ) where
 
 data Ship = Ship Amount ShipLength ShipName
@@ -27,7 +26,6 @@ newtype ShipName = ShipName String
 
 type Point = (Int, Int)
 type ShipPoints = [Point]
-type Board = [[Char]]
 
 carrier :: Ship
 carrier = Ship (Amount 1) (ShipLength 5) (ShipName "carrier")
