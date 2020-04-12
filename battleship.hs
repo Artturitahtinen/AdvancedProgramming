@@ -74,15 +74,15 @@ setShips :: [ShipPoints] -> IO [ShipPoints]
 setShips placedShips = do
     carrier_Ship <- setShip (getShipAmount carrier) (getShipLength carrier) (getShipName carrier) []
     let firstShipPlaced = carrier_Ship : placedShips 
-    battle_Ship <- setShip (getShipAmount battleship) (getShipLength battleship) (getShipName battleship) a
+    battle_Ship <- setShip (getShipAmount battleship) (getShipLength battleship) (getShipName battleship) firstShipPlaced
     let secondShipPlaced = battle_Ship : firstShipPlaced
-    cruiser_Ship <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser) b
+    cruiser_Ship <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser) secondShipPlaced
     let thirdShipPlaced = cruiser_Ship : secondShipPlaced
-    cruiser_Ship2 <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser) c 
+    cruiser_Ship2 <- setShip (getShipAmount cruiser) (getShipLength cruiser) (getShipName cruiser) thirdShipPlaced 
     let fourthShipPlaced = cruiser_Ship2 : thirdShipPlaced
-    destroyer_Ship <- setShip (getShipAmount destroyer) (getShipLength destroyer) (getShipName destroyer) d 
+    destroyer_Ship <- setShip (getShipAmount destroyer) (getShipLength destroyer) (getShipName destroyer) fourthShipPlaced 
     let fifthShipPlaced = destroyer_Ship : fourthShipPlaced
-    submarine_Ship <- setShip (getShipAmount submarine) (getShipLength submarine) (getShipName submarine) e
+    submarine_Ship <- setShip (getShipAmount submarine) (getShipLength submarine) (getShipName submarine) fifthShipPlaced
     let allShipsPlaced = submarine_Ship : fifthShipPlaced
 
     return allShipsPlaced
